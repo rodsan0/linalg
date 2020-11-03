@@ -14,10 +14,10 @@
 
 struct matrix* matrix_new(int n_row, int n_col) {
     assert(n_row >= 1 && n_col >= 1);
-    struct matrix* new_matrix = malloc(sizeof(struct matrix));
+    struct matrix* new_matrix = static_cast<struct matrix*>(malloc(sizeof(struct linreg)));;
     check_memory((void*) new_matrix);
 
-    DATA(new_matrix) = malloc((sizeof(double)) * n_row * n_col);
+    DATA(new_matrix) = static_cast<double*>(malloc((sizeof(double)) * n_row * n_col));
     check_memory((void*) DATA(new_matrix));
 
     new_matrix->n_row = n_row;
@@ -395,7 +395,7 @@ void matrix_print(struct matrix* M) {
    to implement some error tracking system into linalg_obj in the future.
 */
 struct qr_decomp* qr_decomp_new(struct matrix* M) {
-    struct qr_decomp*  qr = malloc(sizeof(struct qr_decomp));
+    struct qr_decomp*  qr = static_cast<struct qr_decomp*>(malloc(sizeof(struct qr_decomp)));;
     return qr;
 }
 

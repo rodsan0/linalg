@@ -17,7 +17,7 @@
 */
 
 struct linreg* linreg_new(void) {
-    struct linreg* lr = malloc(sizeof(struct linreg));
+    struct linreg* lr = static_cast<struct linreg*>(malloc(sizeof(struct linreg)));
     return lr;
 }
 

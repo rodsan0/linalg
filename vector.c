@@ -13,10 +13,10 @@
 struct vector* vector_new(int length) {
     assert(length >= 0);
 
-    struct vector* new_vector = malloc(sizeof(struct vector));
+    struct vector* new_vector = static_cast<struct vector*>(malloc(sizeof(struct vector)));;
     check_memory((void*) new_vector);
 
-    DATA(new_vector) = malloc((sizeof(double)) * length);
+    DATA(new_vector) = static_cast<double*>(malloc((sizeof(double)) * length));;
     check_memory((void*) DATA(new_vector));
 
     new_vector->length = length;
@@ -42,12 +42,12 @@ struct vector* vector_new_view(struct linalg_obj* parent, double* view, int leng
        This doesn't work because matricies have no length.  This could be
        a property of linalg_obj, but then a macro would be needed to
        make the lookup type generic.
-       
+
     assert(DATA(parent) <= view && view < DATA(parent) + parent->length);
     assert(view + length <= DATA(parent) + parent->length);
     */
 
-    struct vector* new_vector = malloc(sizeof(struct vector));
+    struct vector* new_vector = static_cast<struct vector*>(malloc(sizeof(struct vector)));;
     check_memory((void*)new_vector);
 
     DATA(new_vector) = view;

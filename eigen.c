@@ -6,7 +6,7 @@
 #include "linsolve.h"
 
 struct eigen* eigen_new() {
-    struct eigen* e = malloc(sizeof(struct eigen));
+    struct eigen* e = static_cast<struct eigen*>(malloc(sizeof(struct eigen)));
     return e;
 }
 
