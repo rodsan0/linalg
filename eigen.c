@@ -13,7 +13,7 @@ struct eigen* eigen_new() {
 void eigen_free(struct eigen* e) {
     vector_free(e->eigenvalues);
     // matrix_free(e->eigenvectors);
-    free(e); 
+    free(e);
 }
 
 /* Compute the eigenvalues and eigenvectors of a matrix M.
@@ -85,11 +85,11 @@ struct matrix* eigen_solve_eigenvectors(struct matrix* M,
 
     double eigenvalue;
     int n_eigenvalues = M->n_col;
-    struct matrix* eigenvectors = matrix_new(n_eigenvalues, n_eigenvalues); 
-    
+    struct matrix* eigenvectors = matrix_new(n_eigenvalues, n_eigenvalues);
+
     for(int i = 0; i < n_eigenvalues; i++) {
         eigenvalue = VECTOR_IDX_INTO(eigenvalues, i);
-        struct vector* eigenvector = eigen_backsolve(M, eigenvalue, tol, max_iter); 
+        struct vector* eigenvector = eigen_backsolve(M, eigenvalue, tol, max_iter);
         matrix_copy_vector_into_column(eigenvectors, eigenvector, i);
         vector_free(eigenvector);
     }
@@ -122,8 +122,8 @@ struct vector* eigen_backsolve(
     struct vector* previous;
     // Preturb the eigenvalue a litle to prevent our right hand side matrix
     // from becoming singular.
-    double lambda = eigenvalue + ((double) rand() / (double) RAND_MAX) * 0.000001; 
-    
+    double lambda = eigenvalue + ((double) rand() / (double) RAND_MAX) * 0.000001;
+
     struct matrix* M_minus_lambda_I = matrix_M_minus_lambda_I(M, lambda);
 
     double i = 0;

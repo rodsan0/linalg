@@ -78,7 +78,7 @@ struct matrix* matrix_copy(struct matrix* M) {
     return copy;
 }
 
-/* Create a new vector which is a *view* into a row of data in a matrix. 
+/* Create a new vector which is a *view* into a row of data in a matrix.
 
    The new and parent objects share the same data, and modifying the data in
    either will modify both vectors.  One the other hand, we do not have to copy
@@ -424,7 +424,7 @@ struct qr_decomp* matrix_qr_decomposition(struct matrix* M) {
     struct qr_decomp* qr = qr_decomp_new(M);
     struct matrix* q = matrix_new(M->n_row, M->n_col);
     struct matrix* r = matrix_zeros(M->n_col, M->n_col);
-    /* current_column: 
+    /* current_column:
        Initialized to the columns in M, in an outer loop.
        Transformed by subtracting out the projections of current_column onto
        the currently existing columns of Q.  After all projections are removed,
@@ -438,7 +438,7 @@ struct qr_decomp* matrix_qr_decomposition(struct matrix* M) {
     struct vector* current_unit_vector;
     double current_dot_product;
     double norm;
- 
+
     for(int i = 0; i < M->n_col; i++) {
         current_column = matrix_column_copy(M, i);
         for(int j = 0; j < i; j++) {
@@ -446,9 +446,9 @@ struct qr_decomp* matrix_qr_decomposition(struct matrix* M) {
             // vector, saving a malloc and free.
             current_unit_vector = matrix_column_copy(q, j);
             current_dot_product = vector_dot_product(current_unit_vector, current_column);
-            vector_scalar_multiply_into(current_unit_vector, 
+            vector_scalar_multiply_into(current_unit_vector,
                                         current_unit_vector, current_dot_product);
-            vector_subtract_into(current_column, 
+            vector_subtract_into(current_column,
                                  current_column, current_unit_vector);
             vector_free(current_unit_vector);
             MATRIX_IDX_INTO(r, j, i) = current_dot_product;
@@ -461,7 +461,7 @@ struct qr_decomp* matrix_qr_decomposition(struct matrix* M) {
         vector_free(current_column);
     }
 
-    qr->q = q; 
+    qr->q = q;
     qr->r = r;
     return qr;
 }
