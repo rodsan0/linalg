@@ -1,75 +1,55 @@
 #pragma once
+namespace hola {
+
+#include <stdbool.h>
+#include <stdarg.h>
 
 
+#ifndef _VECTOR_MACROS
+#define _VECTOR_MACROS
+#define VECTOR_IDX_INTO(v, i) (DATA(v)[i])
+#endif
 
 
-struct eigen {
-    int n;
-    struct vector* eigenvalues;
-    struct matrix* eigenvectors;
+struct vector {
+    struct linalg_obj la_obj;
+    int length;
 };
 
-struct eigen* eigen_new();
-void eigen_free(struct eigen* e);
+struct vector* vector_new(int length);
+struct vector* vector_new_view(struct linalg_obj* parent, double* view, int length);
+struct vector* vector_from_array(double* data, int length);
+void           vector_free(struct vector*);
+void           vector_free_many(int n_to_free, ...);
 
-struct eigen* eigen_solve(struct matrix* M, double tol, int max_iter);
-struct vector* eigen_solve_eigenvalues(struct matrix* M, double tol, int max_iter);
-struct matrix* eigen_solve_eigenvectors(
-    struct matrix* M, struct vector* eigenvectors, double tol, int max_iter);
-struct vector* eigen_backsolve(
-    struct matrix* M, double eigenvalue, double tol, int max_iter);
-
-
-void raise_memory_allocation_error();
-void raise_non_commensurate_vector_error();
-void raise_non_zero_reference_free_error();
+struct vector* vector_zeros(int length);
+struct vector* vector_constant(int length, double x);
+struct vector* vector_linspace(int length, double min, double max);
+struct vector* vector_slice(struct vector* v, int begin_idx, int end_idx);
+struct vector* vector_copy(struct vector* v);
+void           vector_copy_into(struct vector* reciever, struct vector* v);
 
 
-struct linalg_obj {
-    bool owns_memory;
-    struct linalg_obj* memory_owner;
-    int ref_count;
-    double* data;
-};
+struct vector* vector_subtract(struct vector* v1, struct vector* v2);
+void           vector_subtract_into(struct vector* reciever, 
+                                    struct vector* v1, struct vector* v2);
+struct vector* vector_add(struct vector* v1, struct vector* v2);
+void           vector_add_into(struct vector* reciever,
+                               struct vector* v1, struct vector* v2);
+struct vector* vector_normalize(struct vector* v);
+void           vector_normalize_into(struct vector* reciever, struct vector* v);
+struct vector* vector_scalar_multiply(struct vector* v, double s);
+void           vector_scalar_multiply_into(struct vector* reciever,
+                                           struct vector* v, double s);
 
-#ifndef OWNS_MEMORY
-#define OWNS_MEMORY(object) (((struct linalg_obj*) object)->owns_memory)
-#endif
+bool           vector_equal(struct vector* v1, struct vector* v2, double tol);
 
-#ifndef MEMORY_OWNER
-#define MEMORY_OWNER(object) (((struct linalg_obj*) object)->memory_owner)
-#endif
+double         vector_dot_product(struct vector* v1, struct vector* v2);
+double         vector_norm(struct vector* v);
 
-#ifndef REF_COUNT
-#define REF_COUNT(object) (((struct linalg_obj*) object)->ref_count)
-#endif
+void           vector_print(struct vector*);
 
-#ifndef DATA
-#define DATA(object) (((struct linalg_obj*) object)->data)
-#endif
-
-
-
-struct linreg {
-    int n;
-    int p;
-    struct vector* beta;
-    struct vector* y_hat;
-    double sigma_resid;
-};
-
-struct linreg* linreg_new(void);
-void           linreg_free(struct linreg* lr);
-
-struct linreg* linreg_fit(struct matrix* X, struct vector* y);
-struct vector* linreg_predict(struct linreg* lr, struct matrix* X);
-
-
-
-
-struct vector* linsolve_qr(struct matrix* M, struct vector* v);
-struct vector* linsolve_from_qr(struct qr_decomp* qr, struct vector* v);
-struct vector* linsolve_upper_triangular(struct matrix* M, struct vector* v);
+bool           vector_lengths_equal(struct vector* v1, struct vector* v2);
 
 #include <stdarg.h>
 
@@ -141,6 +121,80 @@ struct qr_decomp* matrix_qr_decomposition(struct matrix* M);
 
 
 
+struct linreg {
+    int n;
+    int p;
+    struct vector* beta;
+    struct vector* y_hat;
+    double sigma_resid;
+};
+
+struct linreg* linreg_new(void);
+void           linreg_free(struct linreg* lr);
+
+struct linreg* linreg_fit(struct matrix* X, struct vector* y);
+struct vector* linreg_predict(struct linreg* lr, struct matrix* X);
+
+
+struct linalg_obj {
+    bool owns_memory;
+    struct linalg_obj* memory_owner;
+    int ref_count;
+    double* data;
+};
+
+#ifndef OWNS_MEMORY
+#define OWNS_MEMORY(object) (((struct hola::linalg_obj*) object)->owns_memory)
+#endif
+
+#ifndef MEMORY_OWNER
+#define MEMORY_OWNER(object) (((struct hola::linalg_obj*) object)->memory_owner)
+#endif
+
+#ifndef REF_COUNT
+#define REF_COUNT(object) (((struct hola::linalg_obj*) object)->ref_count)
+#endif
+
+#ifndef DATA
+#define DATA(object) (((struct hola::linalg_obj*) object)->data)
+#endif
+
+
+void check_memory(void* mem);
+
+
+
+
+struct vector* linsolve_qr(struct matrix* M, struct vector* v);
+struct vector* linsolve_from_qr(struct qr_decomp* qr, struct vector* v);
+struct vector* linsolve_upper_triangular(struct matrix* M, struct vector* v);
+
+
+
+
+struct eigen {
+    int n;
+    struct vector* eigenvalues;
+    struct matrix* eigenvectors;
+};
+
+struct eigen* eigen_new();
+void eigen_free(struct eigen* e);
+
+struct eigen* eigen_solve(struct matrix* M, double tol, int max_iter);
+struct vector* eigen_solve_eigenvalues(struct matrix* M, double tol, int max_iter);
+struct matrix* eigen_solve_eigenvectors(
+    struct matrix* M, struct vector* eigenvectors, double tol, int max_iter);
+struct vector* eigen_backsolve(
+    struct matrix* M, double eigenvalue, double tol, int max_iter);
+
+
+void raise_memory_allocation_error();
+void raise_non_commensurate_vector_error();
+void raise_non_zero_reference_free_error();
+
+
+
 
 
 void init_random();
@@ -148,60 +202,436 @@ struct vector* vector_random_uniform(int length, double low, double high);
 struct matrix* matrix_random_uniform(int n_row, int n_col, double low, double high);
 
 struct vector* vector_random_gaussian(int length, double mu, double sigma);
-
-
-void check_memory(void* mem);
-
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <stdbool.h>
+#include <math.h>
+#include <assert.h>
 #include <stdarg.h>
 
 
-#ifndef _VECTOR_MACROS
-#define _VECTOR_MACROS
-#define VECTOR_IDX_INTO(v, i) (DATA(v)[i])
-#endif
 
 
-struct vector {
-    struct linalg_obj la_obj;
-    int length;
-};
 
-struct vector* vector_new(int length);
-struct vector* vector_new_view(struct linalg_obj* parent, double* view, int length);
-struct vector* vector_from_array(double* data, int length);
-void           vector_free(struct vector*);
-void           vector_free_many(int n_to_free, ...);
+struct vector* vector_new(int length) {
+    assert(length >= 0);
 
-struct vector* vector_zeros(int length);
-struct vector* vector_constant(int length, double x);
-struct vector* vector_linspace(int length, double min, double max);
-struct vector* vector_slice(struct vector* v, int begin_idx, int end_idx);
-struct vector* vector_copy(struct vector* v);
-void           vector_copy_into(struct vector* reciever, struct vector* v);
+    struct vector* new_vector = static_cast<struct vector*>(malloc(sizeof(struct vector)));;
+    check_memory((void*) new_vector);
+
+    DATA(new_vector) = static_cast<double*>(malloc((sizeof(double)) * length));;
+    check_memory((void*) DATA(new_vector));
+
+    new_vector->length = length;
+    OWNS_MEMORY(new_vector)= true;
+    MEMORY_OWNER(new_vector) = NULL;
+    REF_COUNT(new_vector) = 0;
+
+    return new_vector;
+}
+
+/* Create a new vector which is a *view* into an already existing vector.
+
+   The new and parent vectors share the same data, and modifying the data in
+   either will modify both vectors.  One the other hand, we do not have to copy
+   any data to create a view.
+*/
+struct vector* vector_new_view(struct linalg_obj* parent, double* view, int length) {
+    assert(length >= 0);
+    // TODO: Make this view check work.
+    /* Check that pointers to the beginning and end of view vector live
+       within the data segment of the parent object.
+
+       This doesn't work because matricies have no length.  This could be
+       a property of linalg_obj, but then a macro would be needed to
+       make the lookup type generic.
+
+    assert(DATA(parent) <= view && view < DATA(parent) + parent->length);
+    assert(view + length <= DATA(parent) + parent->length);
+    */
+
+    struct vector* new_vector = static_cast<struct vector*>(malloc(sizeof(struct vector)));;
+    check_memory((void*)new_vector);
+
+    DATA(new_vector) = view;
+    new_vector->length = length;
+    OWNS_MEMORY(new_vector) = false;
+    MEMORY_OWNER(new_vector) = parent;
+    REF_COUNT(new_vector) = 0;
+    REF_COUNT(parent) += 1;
+
+    return new_vector;
+}
+
+struct vector* vector_from_array(double* data, int length) {
+    assert(length > 0);
+    struct vector* v = vector_new(length);
+    for(int i = 0; i < v->length; i++) {
+        VECTOR_IDX_INTO(v, i) = data[i];
+    }
+    return v;
+}
+
+void vector_free(struct vector* v) {
+    struct linalg_obj* mem_owner;
+    if(OWNS_MEMORY(v)) {
+        if(REF_COUNT(v) == 0) {
+            free(DATA(v));
+            free(v);
+        } else {
+            raise_non_zero_reference_free_error();
+        }
+    } else {
+        if(REF_COUNT(v) == 0) {
+            mem_owner = MEMORY_OWNER(v);
+            REF_COUNT(mem_owner) -= 1;
+            free(v);
+        } else {
+            raise_non_zero_reference_free_error();
+        }
+    }
+}
+
+void vector_free_many(int n_to_free, ...) {
+    struct vector* v;
+    va_list argp;
+    va_start(argp, n_to_free);
+    for(int i = 0; i < n_to_free; i++) {
+        v = va_arg(argp, struct vector*);
+        vector_free(v);
+    }
+}
+
+/* Construct a vector of a given length filled with a given constant. */
+struct vector* vector_constant(int length, double x) {
+    assert(length > 0);
+    struct vector* v = vector_new(length);
+    for(int i = 0; i < v->length; i++) {
+        VECTOR_IDX_INTO(v, i) = x;
+    }
+    return v;
+}
+
+/* Construct a vector of a given length filled with zeros. */
+struct vector* vector_zeros(int length) {
+    assert(length > 0);
+    return vector_constant(length, 0);
+}
+
+/* Construct a vector of equally spaced points within the closed
+   interval [min, max].
+*/
+struct vector* vector_linspace(int length, double min, double max) {
+    assert(min <= max);
+    assert(length > 1);
+    struct vector* v = vector_new(length);
+    double step = (max - min) / (length - 1);
+    for(int i = 0; i < v->length; i++) {
+        VECTOR_IDX_INTO(v, i) = min + step*i;
+    }
+    return v;
+}
+
+/* Construct a view into a segement of a vector.  The returned vector is
+   a reference to a segment of data contained in the vector v, with left
+   index begin_idx and right index (excluded) end_idx.
+*/
+struct vector* vector_slice(struct vector* v, int begin_idx, int end_idx) {
+    assert(begin_idx <= end_idx);
+    assert(end_idx <= v->length - 1);
+    int new_vector_length = end_idx - begin_idx;
+    double* begin_ptr = DATA(v) + begin_idx;
+    struct vector* w = vector_new_view((struct linalg_obj*) v, begin_ptr, new_vector_length);
+    return w;
+}
+
+/* Copy all the data in a given vector into a new vector. */
+struct vector* vector_copy(struct vector* v) {
+    struct vector* w = vector_new(v->length);
+    vector_copy_into(w, v);
+    return w;
+}
+
+void vector_copy_into(struct vector* reciever, struct vector* v) {
+    assert(v->length == reciever->length);
+    for(int i = 0; i < v->length; i++) {
+        VECTOR_IDX_INTO(reciever, i) = VECTOR_IDX_INTO(v, i);
+    }
+}
+
+/* Arithmatic methods.
+
+    Each of the following methods implements an arithmetic operation on vectors.
+  Each comes in two flavors, anaoagous to the + and += operators:
+
+    - vector_operation(v1, v2) applies the given operation elementwise to pairs
+        taken from v1, v2, and stores the results in a *new* vector, which is
+        then returned.
+    - vector_operation_into(v1, v2) applies the given operation elementwise to
+        pairs taken from v1, v2, and stores the results in v1.  Note that this
+        operation destroys the data in v1, and if v1 is a reference, will
+        mutate the referenced object.
+*/
+struct vector* vector_subtract(struct vector* v1, struct vector* v2) {
+    assert(vector_lengths_equal(v1, v2));
+    struct vector* v = vector_new(v1->length);
+    vector_subtract_into(v, v1, v2);
+    return v;
+}
+
+void vector_subtract_into(struct vector* reciever, struct vector* v1, struct vector* v2) {
+    assert(vector_lengths_equal(v1, v2));
+    for(int i = 0; i < v1->length; i++) {
+        VECTOR_IDX_INTO(reciever, i) = VECTOR_IDX_INTO(v1, i) - VECTOR_IDX_INTO(v2, i);
+    }
+}
+
+struct vector* vector_add(struct vector* v1, struct vector* v2) {
+    assert(vector_lengths_equal(v1, v2));
+    struct vector* v = vector_new(v1->length);
+    vector_add_into(v, v1, v2);
+    return v;
+}
+
+void vector_add_into(struct vector* reciever, struct vector* v1, struct vector* v2) {
+    assert(vector_lengths_equal(v1, v2));
+    for(int i = 0; i < v1->length; i++) {
+        VECTOR_IDX_INTO(reciever, i) = VECTOR_IDX_INTO(v1, i) + VECTOR_IDX_INTO(v2, i);
+    }
+}
+
+struct vector* vector_normalize(struct vector* v) {
+    struct vector* vnorm = vector_new(v->length);
+    double norm = vector_norm(v);
+    assert(norm != 0);
+    vector_normalize_into(vnorm, v);
+    return vnorm;
+}
+
+void vector_normalize_into(struct vector* reciever, struct vector* v) {
+    double norm = vector_norm(v);
+    assert(norm != 0);
+    for(int i = 0; i < v->length; i++) {
+        VECTOR_IDX_INTO(reciever, i) = VECTOR_IDX_INTO(v, i) / norm;
+    }
+}
+
+struct vector* vector_scalar_multiply(struct vector* v, double s) {
+    struct vector* w = vector_new(v->length);
+    vector_scalar_multiply_into(w, v, s);
+    return w;
+}
+
+void vector_scalar_multiply_into(struct vector* reciever, struct vector* v, double s) {
+    for(int i = 0; i < v->length; i++) {
+        VECTOR_IDX_INTO(reciever, i) = VECTOR_IDX_INTO(v, i) * s;
+    }
+}
+
+/* Check that two vectors are equal to within some additive tolerance. */
+bool vector_equal(struct vector* v1, struct vector* v2, double tol) {
+    if(!vector_lengths_equal(v1, v2)) {
+        return false;
+    }
+    for(int i = 0; i < v1->length; i++) {
+        if(fabs(VECTOR_IDX_INTO(v1, i) - VECTOR_IDX_INTO(v2, i)) > tol) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool vector_lengths_equal(struct vector* v1, struct vector* v2) {
+    return (v1->length == v2->length);
+}
+
+double vector_dot_product(struct vector* v1, struct vector* v2) {
+    assert(vector_lengths_equal(v1, v2));
+    double dp = 0;
+    for(int i = 0; i < v1->length; i++) {
+        dp += VECTOR_IDX_INTO(v1, i) * VECTOR_IDX_INTO(v2, i);
+    }
+    return dp;
+}
+
+double vector_norm(struct vector* v) {
+    double norm_squared = vector_dot_product(v, v);
+    return sqrt(norm_squared);
+}
+
+/* Print a vector to the console like:
+    [1, 2, 3, 4]
+*/
+// TODO: Maybe this should return a string, we are computing the representation and
+// displaying it in the same method.
+void vector_print(struct vector* v) {
+    if(v->length == 0) {
+        printf("[]\n");
+    } else if (v->length == 1) {
+        printf("[%.2f]\n", VECTOR_IDX_INTO(v, 0));
+    } else {
+        printf("[%.2f", VECTOR_IDX_INTO(v, 0));
+        for(int i = 1; i < v->length - 1; i++) {
+            printf(", ");
+            printf("%.2f", VECTOR_IDX_INTO(v, i));
+        }
+        printf(", %.2f]\n", VECTOR_IDX_INTO(v, v->length - 1));
+    }
+}
+#include <assert.h>
+#include <time.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <math.h>
 
 
-struct vector* vector_subtract(struct vector* v1, struct vector* v2);
-void           vector_subtract_into(struct vector* reciever, 
-                                    struct vector* v1, struct vector* v2);
-struct vector* vector_add(struct vector* v1, struct vector* v2);
-void           vector_add_into(struct vector* reciever,
-                               struct vector* v1, struct vector* v2);
-struct vector* vector_normalize(struct vector* v);
-void           vector_normalize_into(struct vector* reciever, struct vector* v);
-struct vector* vector_scalar_multiply(struct vector* v, double s);
-void           vector_scalar_multiply_into(struct vector* reciever,
-                                           struct vector* v, double s);
 
-bool           vector_equal(struct vector* v1, struct vector* v2, double tol);
 
-double         vector_dot_product(struct vector* v1, struct vector* v2);
-double         vector_norm(struct vector* v);
+void init_random() {
+    srand(time(NULL));
+}
 
-void           vector_print(struct vector*);
 
-bool           vector_lengths_equal(struct vector* v1, struct vector* v2);
+/***********************
+ * Uniform Distribution
+ ***********************/
 
+double _random_uniform(double low, double high) {
+    assert(low < high);
+    return (high - low) * ((double) rand() / (double) RAND_MAX) - low;
+}
+
+struct vector* vector_random_uniform(int length, double low, double high) {
+    assert(length > 0);
+    struct vector* v = vector_new(length);
+    for(int i = 0; i < length; i++) {
+        VECTOR_IDX_INTO(v, i) = _random_uniform(low, high);
+    }
+    return v;
+}
+
+struct matrix* matrix_random_uniform(int n_row, int n_col, double low, double high) {
+    assert(n_row > 0);
+    assert(n_col >0);
+    struct matrix* M = matrix_new(n_row, n_col);
+    for(int i = 0; i < n_row; i++) {
+        for(int j = 0; j < n_col; j++) {
+            MATRIX_IDX_INTO(M, i, j) = _random_uniform(low, high);
+        }
+    }
+    return M;
+}
+
+
+/*************************
+ * Gaussian Dristribution
+ *************************/
+
+/* Generate a number distributed as random gaussian noise using the Box-Muller
+ * method. 
+   The trick of using the static keyword to remember pairs of values is taken
+   from wikipedia.
+*/
+double _random_gaussian(double mu, double sigma) {
+    const double two_pi = 2.0 * 3.14159265358979323846;
+
+    static double z0, z1;
+    double u0, u1;
+
+    // Since the strategy employed generates pairs of random values, we can,
+    // on each other call, simply remember the leftover value and return it.
+    static bool generate_new_values = false;
+    generate_new_values = !generate_new_values;
+    if (!generate_new_values) {
+        return z1 * sigma + mu;
+    }
+
+    u0 = _random_uniform(0, 1);
+    u1 = _random_uniform(0, 1);
+    z0 = sqrt(-2.0 * log(u0)) * cos(two_pi * u1);
+    z1 = sqrt(-2.0 * log(u0)) * sin(two_pi * u1);
+
+    return z0 * sigma + mu;
+}
+
+struct vector* vector_random_gaussian(int length, double mu, double sigma) {
+    assert(length > 0);
+    struct vector* v = vector_new(length);
+    for(int i = 0; i < length; i++) {
+        VECTOR_IDX_INTO(v, i) = _random_gaussian(mu, sigma);
+    }
+    return v;
+}
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <assert.h>
+#include <math.h>
+
+
+
+
+
+/* Linear Regression.
+
+  Fit and score a linear regression to a design matrix X and a response vector y.
+  The regression is fit by solving the following linear equation for b:
+
+      Xt X b = Xt y
+*/
+
+struct linreg* linreg_new(void) {
+    struct linreg* lr = static_cast<struct linreg*>(malloc(sizeof(struct linreg)));
+    return lr;
+}
+
+void linreg_free(struct linreg* lr) {
+    vector_free(lr->beta);
+    vector_free(lr->y_hat);
+    free(lr);
+}
+
+/* Solve a linear regression problem using the qr decomposition of the matrix X.
+
+  The idea here is that if X = QR, then the linear regression equations reduce
+  to R b = Q^t y.
+*/
+struct linreg* linreg_fit(struct matrix* X, struct vector* y) {
+    assert(X->n_row == y->length);
+    struct linreg* lr = linreg_new();
+    lr->n = X->n_row;
+    lr->p = X->n_col;
+
+    // Solve linear equation for the regression coefficients.
+    struct qr_decomp* qr = matrix_qr_decomposition(X);
+    struct vector* qtv = matrix_vector_multiply_Mtv(qr->q, y);
+    lr->beta = linsolve_upper_triangular(qr->r, qtv);
+
+    // Calculate the residual standard deviation.
+    struct vector* y_hat = linreg_predict(lr, X);
+    double sigma_resid_sq = 0; double resid = 0;
+    for(int i = 0; i < y->length; i++) {
+        resid = VECTOR_IDX_INTO(y, i) - VECTOR_IDX_INTO(y_hat, i);
+        sigma_resid_sq += resid * resid;
+    }
+    double norm_factor = 1 / (lr->n - lr->p - 1);
+    double sigma_resid = sqrt(norm_factor * sigma_resid_sq);
+    lr->y_hat = y_hat;
+    lr->sigma_resid = sigma_resid;
+
+    qr_decomp_free(qr);
+    vector_free(qtv);
+
+    return lr;
+}
+
+struct vector* linreg_predict(struct linreg* lr, struct matrix* X) {
+    assert(lr->n == X->n_row);
+    assert(lr->p == X->n_col);
+    struct vector* preds = matrix_vector_multiply(X, lr->beta);
+    return preds;
+}
 #include <assert.h>
 #include <stdlib.h>
 
@@ -216,7 +646,7 @@ struct eigen* eigen_new() {
 
 void eigen_free(struct eigen* e) {
     vector_free(e->eigenvalues);
-    // matrix_free(e->eigenvectors);
+    matrix_free(e->eigenvectors);
     free(e);
 }
 
@@ -273,7 +703,12 @@ struct vector* eigen_solve_eigenvalues(struct matrix* M,
         i++;
     } while(!matrix_is_upper_triangular(X, tol) && (i < max_iter));
 
-    return matrix_diagonal(X);
+    struct vector* res = matrix_diagonal(X);
+
+    matrix_free( X );
+
+    return res;
+
 }
 
 /* Solve for the eigenvectors of a matrix M once the eigenvalues are known
@@ -351,166 +786,8 @@ struct vector* eigen_backsolve(
     } while(!vector_equal(current, previous, tol) && (i < max_iter));
 
     vector_free(previous);
+    matrix_free(M_minus_lambda_I);
     return current;
-}
-#include <stdlib.h>
-#include <stdio.h>
-
-
-void raise_memory_allocation_error() {
-    fprintf(stderr, "Memory allocation error.\n");
-    exit(EXIT_FAILURE);
-}
-
-void raise_non_commensurate_vector_error() {
-    fprintf(stderr, "Vectors are not of the same length.\n");
-    exit(EXIT_FAILURE);
-}
-void raise_non_zero_reference_free_error() {
-    fprintf(stderr, "Attempted to free memory with non-zero reference count.\n");
-    exit(EXIT_FAILURE);
-}
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <assert.h>
-#include <math.h>
-
-
-
-
-
-/* Linear Regression.
-
-  Fit and score a linear regression to a design matrix X and a response vector y.
-  The regression is fit by solving the following linear equation for b:
-
-      Xt X b = Xt y
-*/
-
-struct linreg* linreg_new(void) {
-    struct linreg* lr = static_cast<struct linreg*>(malloc(sizeof(struct linreg)));
-    return lr;
-}
-
-void linreg_free(struct linreg* lr) {
-    vector_free(lr->beta);
-    vector_free(lr->y_hat);
-    free(lr);
-}
-
-/* Solve a linear regression problem using the qr decomposition of the matrix X.
-
-  The idea here is that if X = QR, then the linear regression equations reduce
-  to R b = Q^t y.
-*/
-struct linreg* linreg_fit(struct matrix* X, struct vector* y) {
-    assert(X->n_row == y->length);
-    struct linreg* lr = linreg_new();
-    lr->n = X->n_row;
-    lr->p = X->n_col;
-
-    // Solve linear equation for the regression coefficients.
-    struct qr_decomp* qr = matrix_qr_decomposition(X);
-    struct vector* qtv = matrix_vector_multiply_Mtv(qr->q, y);
-    lr->beta = linsolve_upper_triangular(qr->r, qtv);
-
-    // Calculate the residual standard deviation.
-    struct vector* y_hat = linreg_predict(lr, X);
-    double sigma_resid_sq = 0; double resid = 0;
-    for(int i = 0; i < y->length; i++) {
-        resid = VECTOR_IDX_INTO(y, i) - VECTOR_IDX_INTO(y_hat, i);
-        sigma_resid_sq += resid * resid;
-    }
-    double norm_factor = 1 / (lr->n - lr->p - 1);
-    double sigma_resid = sqrt(norm_factor * sigma_resid_sq);
-    lr->y_hat = y_hat;
-    lr->sigma_resid = sigma_resid;
-
-    qr_decomp_free(qr);
-    vector_free(qtv);
-
-    return lr;
-}
-
-struct vector* linreg_predict(struct linreg* lr, struct matrix* X) {
-    assert(lr->n == X->n_row);
-    assert(lr->p == X->n_col);
-    struct vector* preds = matrix_vector_multiply(X, lr->beta);
-    return preds;
-}
-#include <assert.h>
-
-
-
-
-/* Solve a general linear equation Mx = v using the QR decomposition of M.
-
-   If QR is the decomposion of M, then using the fact that Q is orthogonal
-
-     QRx = v => Rx = transpose(Q)v
-
-   The matrix product transpose(Q)v is easy to compute, so the decomposition
-   reduces the problem to solving a linear equation Rx = y for an upper
-   triangular matrix R.
-  
-*/
-struct vector* linsolve_qr(struct matrix* M, struct vector* v) {
-    assert(M->n_row == v->length);
-    struct qr_decomp* qr = matrix_qr_decomposition(M);
-    struct vector* solution = linsolve_from_qr(qr, v);
-    qr_decomp_free(qr);
-    return solution;
-}
-
-/* Solve from the qr decomposition itself.  Useful if multiple equations
-   with the same left hand side need to be solved.
-*/
-struct vector* linsolve_from_qr(struct qr_decomp* qr, struct vector* v) {
-    struct vector* rhs = matrix_vector_multiply_Mtv(qr->q, v);
-    struct vector* solution = linsolve_upper_triangular(qr->r, rhs);
-    vector_free(rhs);
-    return solution;
-}
-
-/* Solve a linear equation Rx = v, where R is an upper triangular matrix.
-
-   This type of equation is easy to solve by back substitution.  We work *up*
-   the rows of R solving for the components of x backwards.  For example, the
-   final row in R gives the equation
-
-     r_{l,l} x_l = v_l
-
-   whose solution is simply x_l = v_l / r_{l,l}.  The second to final row gives
-   the equation
-
-     r_(l-1,l-1} x_{l-1} + r_{l-1,l} x_{l} = v_l
-
-   which can be solved by substituting in the value of x_l already found, and
-   then solving the resulting equation for x_{l-1}.  Continuing in this way
-   solves the entire system.
-*/ 
-struct vector* linsolve_upper_triangular(struct matrix* R, struct vector* v) {
-    assert(R->n_col == v->length);
-    assert(R->n_row = R->n_col);
-    // TODO: Check upper triangular.
-    int n_eq = v->length;
-    struct vector* solution = vector_new(n_eq);
-    /* back_substitute:
-       Tracks the part of the current equation (row) that reduces to a constant
-       after substituting in the values for the already solved for varaiables.
-    */
-    float back_substitute;
-
-    for(int i = n_eq - 1; i >= 0; i--) {
-        back_substitute = 0;
-        for(int j = i+1; j <= n_eq - 1; j++) {
-            back_substitute += VECTOR_IDX_INTO(solution, j) * MATRIX_IDX_INTO(R, i, j);
-        }
-        VECTOR_IDX_INTO(solution, i) =
-            (VECTOR_IDX_INTO(v, i) - back_substitute) / MATRIX_IDX_INTO(R, i, i);
-    }
-    return solution;
 }
 #include <stdlib.h>
 #include <stdio.h>
@@ -979,90 +1256,6 @@ struct qr_decomp* matrix_qr_decomposition(struct matrix* M) {
     qr->r = r;
     return qr;
 }
-#include <assert.h>
-#include <time.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <math.h>
-
-
-
-
-void init_random() {
-    srand(time(NULL));
-}
-
-
-/***********************
- * Uniform Distribution
- ***********************/
-
-double _random_uniform(double low, double high) {
-    assert(low < high);
-    return (high - low) * ((double) rand() / (double) RAND_MAX) - low;
-}
-
-struct vector* vector_random_uniform(int length, double low, double high) {
-    assert(length > 0);
-    struct vector* v = vector_new(length);
-    for(int i = 0; i < length; i++) {
-        VECTOR_IDX_INTO(v, i) = _random_uniform(low, high);
-    }
-    return v;
-}
-
-struct matrix* matrix_random_uniform(int n_row, int n_col, double low, double high) {
-    assert(n_row > 0);
-    assert(n_col >0);
-    struct matrix* M = matrix_new(n_row, n_col);
-    for(int i = 0; i < n_row; i++) {
-        for(int j = 0; j < n_col; j++) {
-            MATRIX_IDX_INTO(M, i, j) = _random_uniform(low, high);
-        }
-    }
-    return M;
-}
-
-
-/*************************
- * Gaussian Dristribution
- *************************/
-
-/* Generate a number distributed as random gaussian noise using the Box-Muller
- * method. 
-   The trick of using the static keyword to remember pairs of values is taken
-   from wikipedia.
-*/
-double _random_gaussian(double mu, double sigma) {
-    const double two_pi = 2.0 * 3.14159265358979323846;
-
-    static double z0, z1;
-    double u0, u1;
-
-    // Since the strategy employed generates pairs of random values, we can,
-    // on each other call, simply remember the leftover value and return it.
-    static bool generate_new_values = false;
-    generate_new_values = !generate_new_values;
-    if (!generate_new_values) {
-        return z1 * sigma + mu;
-    }
-
-    u0 = _random_uniform(0, 1);
-    u1 = _random_uniform(0, 1);
-    z0 = sqrt(-2.0 * log(u0)) * cos(two_pi * u1);
-    z1 = sqrt(-2.0 * log(u0)) * sin(two_pi * u1);
-
-    return z0 * sigma + mu;
-}
-
-struct vector* vector_random_gaussian(int length, double mu, double sigma) {
-    assert(length > 0);
-    struct vector* v = vector_new(length);
-    for(int i = 0; i < length; i++) {
-        VECTOR_IDX_INTO(v, i) = _random_gaussian(mu, sigma);
-    }
-    return v;
-}
 #include <stdlib.h>
 
 
@@ -1074,278 +1267,92 @@ void check_memory(void* mem) {
 }
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
-#include <math.h>
+
+
+void raise_memory_allocation_error() {
+    fprintf(stderr, "Memory allocation error.\n");
+    exit(EXIT_FAILURE);
+}
+
+void raise_non_commensurate_vector_error() {
+    fprintf(stderr, "Vectors are not of the same length.\n");
+    exit(EXIT_FAILURE);
+}
+void raise_non_zero_reference_free_error() {
+    fprintf(stderr, "Attempted to free memory with non-zero reference count.\n");
+    exit(EXIT_FAILURE);
+}
 #include <assert.h>
-#include <stdarg.h>
 
 
 
 
+/* Solve a general linear equation Mx = v using the QR decomposition of M.
 
-struct vector* vector_new(int length) {
-    assert(length >= 0);
+   If QR is the decomposion of M, then using the fact that Q is orthogonal
 
-    struct vector* new_vector = static_cast<struct vector*>(malloc(sizeof(struct vector)));;
-    check_memory((void*) new_vector);
+     QRx = v => Rx = transpose(Q)v
 
-    DATA(new_vector) = static_cast<double*>(malloc((sizeof(double)) * length));;
-    check_memory((void*) DATA(new_vector));
-
-    new_vector->length = length;
-    OWNS_MEMORY(new_vector)= true;
-    MEMORY_OWNER(new_vector) = NULL;
-    REF_COUNT(new_vector) = 0;
-
-    return new_vector;
+   The matrix product transpose(Q)v is easy to compute, so the decomposition
+   reduces the problem to solving a linear equation Rx = y for an upper
+   triangular matrix R.
+  
+*/
+struct vector* linsolve_qr(struct matrix* M, struct vector* v) {
+    assert(M->n_row == v->length);
+    struct qr_decomp* qr = matrix_qr_decomposition(M);
+    struct vector* solution = linsolve_from_qr(qr, v);
+    qr_decomp_free(qr);
+    return solution;
 }
 
-/* Create a new vector which is a *view* into an already existing vector.
-
-   The new and parent vectors share the same data, and modifying the data in
-   either will modify both vectors.  One the other hand, we do not have to copy
-   any data to create a view.
+/* Solve from the qr decomposition itself.  Useful if multiple equations
+   with the same left hand side need to be solved.
 */
-struct vector* vector_new_view(struct linalg_obj* parent, double* view, int length) {
-    assert(length >= 0);
-    // TODO: Make this view check work.
-    /* Check that pointers to the beginning and end of view vector live
-       within the data segment of the parent object.
+struct vector* linsolve_from_qr(struct qr_decomp* qr, struct vector* v) {
+    struct vector* rhs = matrix_vector_multiply_Mtv(qr->q, v);
+    struct vector* solution = linsolve_upper_triangular(qr->r, rhs);
+    vector_free(rhs);
+    return solution;
+}
 
-       This doesn't work because matricies have no length.  This could be
-       a property of linalg_obj, but then a macro would be needed to
-       make the lookup type generic.
+/* Solve a linear equation Rx = v, where R is an upper triangular matrix.
 
-    assert(DATA(parent) <= view && view < DATA(parent) + parent->length);
-    assert(view + length <= DATA(parent) + parent->length);
+   This type of equation is easy to solve by back substitution.  We work *up*
+   the rows of R solving for the components of x backwards.  For example, the
+   final row in R gives the equation
+
+     r_{l,l} x_l = v_l
+
+   whose solution is simply x_l = v_l / r_{l,l}.  The second to final row gives
+   the equation
+
+     r_(l-1,l-1} x_{l-1} + r_{l-1,l} x_{l} = v_l
+
+   which can be solved by substituting in the value of x_l already found, and
+   then solving the resulting equation for x_{l-1}.  Continuing in this way
+   solves the entire system.
+*/ 
+struct vector* linsolve_upper_triangular(struct matrix* R, struct vector* v) {
+    assert(R->n_col == v->length);
+    assert(R->n_row = R->n_col);
+    // TODO: Check upper triangular.
+    int n_eq = v->length;
+    struct vector* solution = vector_new(n_eq);
+    /* back_substitute:
+       Tracks the part of the current equation (row) that reduces to a constant
+       after substituting in the values for the already solved for varaiables.
     */
+    float back_substitute;
 
-    struct vector* new_vector = static_cast<struct vector*>(malloc(sizeof(struct vector)));;
-    check_memory((void*)new_vector);
-
-    DATA(new_vector) = view;
-    new_vector->length = length;
-    OWNS_MEMORY(new_vector) = false;
-    MEMORY_OWNER(new_vector) = parent;
-    REF_COUNT(new_vector) = 0;
-    REF_COUNT(parent) += 1;
-
-    return new_vector;
-}
-
-struct vector* vector_from_array(double* data, int length) {
-    assert(length > 0);
-    struct vector* v = vector_new(length);
-    for(int i = 0; i < v->length; i++) {
-        VECTOR_IDX_INTO(v, i) = data[i];
-    }
-    return v;
-}
-
-void vector_free(struct vector* v) {
-    struct linalg_obj* mem_owner;
-    if(OWNS_MEMORY(v)) {
-        if(REF_COUNT(v) == 0) {
-            free(DATA(v));
-            free(v);
-        } else {
-            raise_non_zero_reference_free_error();
+    for(int i = n_eq - 1; i >= 0; i--) {
+        back_substitute = 0;
+        for(int j = i+1; j <= n_eq - 1; j++) {
+            back_substitute += VECTOR_IDX_INTO(solution, j) * MATRIX_IDX_INTO(R, i, j);
         }
-    } else {
-        if(REF_COUNT(v) == 0) {
-            mem_owner = MEMORY_OWNER(v);
-            REF_COUNT(mem_owner) -= 1;
-            free(v);
-        } else {
-            raise_non_zero_reference_free_error();
-        }
+        VECTOR_IDX_INTO(solution, i) =
+            (VECTOR_IDX_INTO(v, i) - back_substitute) / MATRIX_IDX_INTO(R, i, i);
     }
+    return solution;
 }
-
-void vector_free_many(int n_to_free, ...) {
-    struct vector* v;
-    va_list argp;
-    va_start(argp, n_to_free);
-    for(int i = 0; i < n_to_free; i++) {
-        v = va_arg(argp, struct vector*);
-        vector_free(v);
-    }
-}
-
-/* Construct a vector of a given length filled with a given constant. */
-struct vector* vector_constant(int length, double x) {
-    assert(length > 0);
-    struct vector* v = vector_new(length);
-    for(int i = 0; i < v->length; i++) {
-        VECTOR_IDX_INTO(v, i) = x;
-    }
-    return v;
-}
-
-/* Construct a vector of a given length filled with zeros. */
-struct vector* vector_zeros(int length) {
-    assert(length > 0);
-    return vector_constant(length, 0);
-}
-
-/* Construct a vector of equally spaced points within the closed
-   interval [min, max].
-*/
-struct vector* vector_linspace(int length, double min, double max) {
-    assert(min <= max);
-    assert(length > 1);
-    struct vector* v = vector_new(length);
-    double step = (max - min) / (length - 1);
-    for(int i = 0; i < v->length; i++) {
-        VECTOR_IDX_INTO(v, i) = min + step*i;
-    }
-    return v;
-}
-
-/* Construct a view into a segement of a vector.  The returned vector is
-   a reference to a segment of data contained in the vector v, with left
-   index begin_idx and right index (excluded) end_idx.
-*/
-struct vector* vector_slice(struct vector* v, int begin_idx, int end_idx) {
-    assert(begin_idx <= end_idx);
-    assert(end_idx <= v->length - 1);
-    int new_vector_length = end_idx - begin_idx;
-    double* begin_ptr = DATA(v) + begin_idx;
-    struct vector* w = vector_new_view((struct linalg_obj*) v, begin_ptr, new_vector_length);
-    return w;
-}
-
-/* Copy all the data in a given vector into a new vector. */
-struct vector* vector_copy(struct vector* v) {
-    struct vector* w = vector_new(v->length);
-    vector_copy_into(w, v);
-    return w;
-}
-
-void vector_copy_into(struct vector* reciever, struct vector* v) {
-    assert(v->length == reciever->length);
-    for(int i = 0; i < v->length; i++) {
-        VECTOR_IDX_INTO(reciever, i) = VECTOR_IDX_INTO(v, i);
-    }
-}
-
-/* Arithmatic methods.
-
-    Each of the following methods implements an arithmetic operation on vectors.
-  Each comes in two flavors, anaoagous to the + and += operators:
-
-    - vector_operation(v1, v2) applies the given operation elementwise to pairs
-        taken from v1, v2, and stores the results in a *new* vector, which is
-        then returned.
-    - vector_operation_into(v1, v2) applies the given operation elementwise to
-        pairs taken from v1, v2, and stores the results in v1.  Note that this
-        operation destroys the data in v1, and if v1 is a reference, will
-        mutate the referenced object.
-*/
-struct vector* vector_subtract(struct vector* v1, struct vector* v2) {
-    assert(vector_lengths_equal(v1, v2));
-    struct vector* v = vector_new(v1->length);
-    vector_subtract_into(v, v1, v2);
-    return v;
-}
-
-void vector_subtract_into(struct vector* reciever, struct vector* v1, struct vector* v2) {
-    assert(vector_lengths_equal(v1, v2));
-    for(int i = 0; i < v1->length; i++) {
-        VECTOR_IDX_INTO(reciever, i) = VECTOR_IDX_INTO(v1, i) - VECTOR_IDX_INTO(v2, i);
-    }
-}
-
-struct vector* vector_add(struct vector* v1, struct vector* v2) {
-    assert(vector_lengths_equal(v1, v2));
-    struct vector* v = vector_new(v1->length);
-    vector_add_into(v, v1, v2);
-    return v;
-}
-
-void vector_add_into(struct vector* reciever, struct vector* v1, struct vector* v2) {
-    assert(vector_lengths_equal(v1, v2));
-    for(int i = 0; i < v1->length; i++) {
-        VECTOR_IDX_INTO(reciever, i) = VECTOR_IDX_INTO(v1, i) + VECTOR_IDX_INTO(v2, i);
-    }
-}
-
-struct vector* vector_normalize(struct vector* v) {
-    struct vector* vnorm = vector_new(v->length);
-    double norm = vector_norm(v);
-    assert(norm != 0);
-    vector_normalize_into(vnorm, v);
-    return vnorm;
-}
-
-void vector_normalize_into(struct vector* reciever, struct vector* v) {
-    double norm = vector_norm(v);
-    assert(norm != 0);
-    for(int i = 0; i < v->length; i++) {
-        VECTOR_IDX_INTO(reciever, i) = VECTOR_IDX_INTO(v, i) / norm;
-    }
-}
-
-struct vector* vector_scalar_multiply(struct vector* v, double s) {
-    struct vector* w = vector_new(v->length);
-    vector_scalar_multiply_into(w, v, s);
-    return w;
-}
-
-void vector_scalar_multiply_into(struct vector* reciever, struct vector* v, double s) {
-    for(int i = 0; i < v->length; i++) {
-        VECTOR_IDX_INTO(reciever, i) = VECTOR_IDX_INTO(v, i) * s;
-    }
-}
-
-/* Check that two vectors are equal to within some additive tolerance. */
-bool vector_equal(struct vector* v1, struct vector* v2, double tol) {
-    if(!vector_lengths_equal(v1, v2)) {
-        return false;
-    }
-    for(int i = 0; i < v1->length; i++) {
-        if(fabs(VECTOR_IDX_INTO(v1, i) - VECTOR_IDX_INTO(v2, i)) > tol) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool vector_lengths_equal(struct vector* v1, struct vector* v2) {
-    return (v1->length == v2->length);
-}
-
-double vector_dot_product(struct vector* v1, struct vector* v2) {
-    assert(vector_lengths_equal(v1, v2));
-    double dp = 0;
-    for(int i = 0; i < v1->length; i++) {
-        dp += VECTOR_IDX_INTO(v1, i) * VECTOR_IDX_INTO(v2, i);
-    }
-    return dp;
-}
-
-double vector_norm(struct vector* v) {
-    double norm_squared = vector_dot_product(v, v);
-    return sqrt(norm_squared);
-}
-
-/* Print a vector to the console like:
-    [1, 2, 3, 4]
-*/
-// TODO: Maybe this should return a string, we are computing the representation and
-// displaying it in the same method.
-void vector_print(struct vector* v) {
-    if(v->length == 0) {
-        printf("[]\n");
-    } else if (v->length == 1) {
-        printf("[%.2f]\n", VECTOR_IDX_INTO(v, 0));
-    } else {
-        printf("[%.2f", VECTOR_IDX_INTO(v, 0));
-        for(int i = 1; i < v->length - 1; i++) {
-            printf(", ");
-            printf("%.2f", VECTOR_IDX_INTO(v, i));
-        }
-        printf(", %.2f]\n", VECTOR_IDX_INTO(v, v->length - 1));
-    }
-}
+} // namespace hola
