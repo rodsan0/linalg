@@ -1,6 +1,30 @@
 #pragma once
 namespace hola {
 
+
+struct linalg_obj {
+    bool owns_memory;
+    struct linalg_obj* memory_owner;
+    int ref_count;
+    double* data;
+};
+
+#ifndef OWNS_MEMORY
+#define OWNS_MEMORY(object) (((struct hola::linalg_obj*) object)->owns_memory)
+#endif
+
+#ifndef MEMORY_OWNER
+#define MEMORY_OWNER(object) (((struct hola::linalg_obj*) object)->memory_owner)
+#endif
+
+#ifndef REF_COUNT
+#define REF_COUNT(object) (((struct hola::linalg_obj*) object)->ref_count)
+#endif
+
+#ifndef DATA
+#define DATA(object) (((struct hola::linalg_obj*) object)->data)
+#endif
+
 #include <stdbool.h>
 #include <stdarg.h>
 
@@ -134,30 +158,6 @@ void           linreg_free(struct linreg* lr);
 
 struct linreg* linreg_fit(struct matrix* X, struct vector* y);
 struct vector* linreg_predict(struct linreg* lr, struct matrix* X);
-
-
-struct linalg_obj {
-    bool owns_memory;
-    struct linalg_obj* memory_owner;
-    int ref_count;
-    double* data;
-};
-
-#ifndef OWNS_MEMORY
-#define OWNS_MEMORY(object) (((struct hola::linalg_obj*) object)->owns_memory)
-#endif
-
-#ifndef MEMORY_OWNER
-#define MEMORY_OWNER(object) (((struct hola::linalg_obj*) object)->memory_owner)
-#endif
-
-#ifndef REF_COUNT
-#define REF_COUNT(object) (((struct hola::linalg_obj*) object)->ref_count)
-#endif
-
-#ifndef DATA
-#define DATA(object) (((struct hola::linalg_obj*) object)->data)
-#endif
 
 
 void check_memory(void* mem);
