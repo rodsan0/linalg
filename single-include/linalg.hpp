@@ -403,14 +403,14 @@ void vector_add_into(struct vector* reciever, struct vector* v1, struct vector* 
 
 struct vector* vector_normalize(struct vector* v) {
     struct vector* vnorm = vector_new(v->length);
-    double norm = vector_norm(v);
+    [[maybe_unused]] double norm = vector_norm(v);
     assert(norm != 0);
     vector_normalize_into(vnorm, v);
     return vnorm;
 }
 
 void vector_normalize_into(struct vector* reciever, struct vector* v) {
-    double norm = vector_norm(v);
+    [[maybe_unused]] double norm = vector_norm(v);
     assert(norm != 0);
     for(int i = 0; i < v->length; i++) {
         VECTOR_IDX_INTO(reciever, i) = VECTOR_IDX_INTO(v, i) / norm;

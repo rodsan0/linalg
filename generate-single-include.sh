@@ -25,3 +25,5 @@ sed -i 's/#define MEMORY_OWNER(object) (((struct linalg_obj\*) object)->memory_o
 sed -i 's/#define REF_COUNT(object) (((struct linalg_obj\*) object)->ref_count)/#define REF_COUNT(object) (((struct hola::linalg_obj*) object)->ref_count)/g' single-include/linalg.hpp
 
 sed -i 's/#define DATA(object) (((struct linalg_obj\*) object)->data)/#define DATA(object) (((struct hola::linalg_obj*) object)->data)/g' single-include/linalg.hpp
+
+sed -i 's/double norm = vector_norm(v);/[[maybe_unused]] double norm = vector_norm(v);/g' single-include/linalg.hpp
