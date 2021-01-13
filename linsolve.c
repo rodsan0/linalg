@@ -12,7 +12,7 @@
    The matrix product transpose(Q)v is easy to compute, so the decomposition
    reduces the problem to solving a linear equation Rx = y for an upper
    triangular matrix R.
-  
+
 */
 struct vector* linsolve_qr(struct matrix* M, struct vector* v) {
     assert(M->n_row == v->length);
@@ -48,7 +48,7 @@ struct vector* linsolve_from_qr(struct qr_decomp* qr, struct vector* v) {
    which can be solved by substituting in the value of x_l already found, and
    then solving the resulting equation for x_{l-1}.  Continuing in this way
    solves the entire system.
-*/ 
+*/
 struct vector* linsolve_upper_triangular(struct matrix* R, struct vector* v) {
     assert(R->n_col == v->length);
     assert(R->n_row = R->n_col);

@@ -13,9 +13,9 @@ void time_matrix_multiply() {
     for(int cache = 0; cache < 1000; cache += 50) {
         clock_t start = clock(), diff;
         if(cache > 0) {
-            P = matrix_multiply_cache(M, N, cache); 
+            P = matrix_multiply_cache(M, N, cache);
         } else {
-            P = matrix_multiply(M, N); 
+            P = matrix_multiply(M, N);
         }
         diff = clock() - start;
 

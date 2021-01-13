@@ -12,7 +12,7 @@
 
 
 /**********************************
- * Unit tests for vector module. 
+ * Unit tests for vector module.
  **********************************/
 
 bool test_vector_zeros() {
@@ -145,7 +145,7 @@ struct test vector_tests[] = {
 
 
 /**********************************
- * Unit tests for matrix module. 
+ * Unit tests for matrix module.
  **********************************/
 
 bool test_matrix_zeros() {
@@ -402,7 +402,7 @@ bool test_matrix_is_upper_triangular() {
                   0.0, 0.5, 0.0,
                   0.0, 0.0, 4.0};
     struct matrix* M = matrix_from_array(D, 3, 3);
-    return matrix_is_upper_triangular(M, 0.01); 
+    return matrix_is_upper_triangular(M, 0.01);
 }
 
 bool test_matrix_is_not_upper_triangular() {
@@ -410,7 +410,7 @@ bool test_matrix_is_not_upper_triangular() {
                   0.0, 0.5, 0.0,
                   1.0, 0.0, 4.0};
     struct matrix* M = matrix_from_array(D, 3, 3);
-    return !matrix_is_upper_triangular(M, 0.01); 
+    return !matrix_is_upper_triangular(M, 0.01);
 }
 
 bool test_qr_decomp_identity() {
@@ -527,7 +527,7 @@ bool test_eigenvalues_diagonal() {
                   0.0, 0.5, 0.0,
                   0.0, 0.0, 4.0};
     struct matrix* M = matrix_from_array(D, 3, 3);
-    struct eigen* e = eigen_solve(M, 0.0001, 100); 
+    struct eigen* e = eigen_solve(M, 0.0001, 100);
     double C[] = {1.0, 0.5, 4.0};
     struct vector* res = vector_from_array(C, 3);
     bool test = vector_equal(e->eigenvalues, res, 0.01);
@@ -539,7 +539,7 @@ bool test_eigenvalues_simple_2x2() {
     double D[] = {2.0, 1.0,
                   2.0, 3.0};
     struct matrix* M = matrix_from_array(D, 2, 2);
-    struct eigen* e = eigen_solve(M, 0.0001, 100); 
+    struct eigen* e = eigen_solve(M, 0.0001, 100);
     double C[] = {4.0, 1.0};
     struct vector* res = vector_from_array(C, 2);
     bool test = vector_equal(e->eigenvalues, res, 0.01);
@@ -552,7 +552,7 @@ bool test_eigenvalues_simple_3x3() {
                   -2.0,  1.0, 2.0,
                    4.0,  2.0, 5.0};
     struct matrix* M = matrix_from_array(D, 3, 3);
-    struct eigen* e = eigen_solve(M, 0.0001, 100); 
+    struct eigen* e = eigen_solve(M, 0.0001, 100);
     double C[] = {6.0, -5.0, 3};
     struct vector* res = vector_from_array(C, 3);
     bool test = vector_equal(e->eigenvalues, res, 0.01);
@@ -565,7 +565,7 @@ bool test_eigenvectors_random() {
     // probability one.
     struct matrix* X = matrix_random_uniform(10, 10, -1, 1);
     struct matrix* M = matrix_multiply_MtN(X, X);
-    struct eigen* e = eigen_solve(M, 0.000001, 250); 
+    struct eigen* e = eigen_solve(M, 0.000001, 250);
 
     // Test if the eigenvectors actually are eigenvectors by mutiplying M
     // into the eigenvector matrix and testing if the ratios are all given
@@ -576,7 +576,7 @@ bool test_eigenvectors_random() {
     for(int i = 0; i < e->eigenvectors->n_col; i++) {
         eigenvalue = VECTOR_IDX_INTO(e->eigenvalues, i);
         for(int j = 0; j < e->eigenvectors->n_row; j++) {
-            ratio = MATRIX_IDX_INTO(ME, j, i) / MATRIX_IDX_INTO(e->eigenvectors, j, i); 
+            ratio = MATRIX_IDX_INTO(ME, j, i) / MATRIX_IDX_INTO(e->eigenvectors, j, i);
             if(fabs(ratio - eigenvalue) > 0.01) {
                 test = false;
                 goto cleanup;
@@ -632,7 +632,7 @@ struct test matrix_tests[] = {
 
 
 /**********************************
- * Unit tests for linsolve module. 
+ * Unit tests for linsolve module.
  **********************************/
 
 bool test_solve_qr_identity() {
@@ -696,7 +696,7 @@ struct test linsolve_tests[] = {
 
 
 /*******************************************
- * Unit tests for linear regression module. 
+ * Unit tests for linear regression module.
  *******************************************/
 
 bool test_linreg_simple() {
@@ -799,7 +799,7 @@ void _display_result(bool test_success, char* test_name) {
 void _display_final_result(bool all_success, int n_pass_tests, int n_fail_tests) {
     printf("\n");
     if(all_success) {
-        printf("All tests pass (%d passed, %d failed).\n", 
+        printf("All tests pass (%d passed, %d failed).\n",
                n_pass_tests, n_fail_tests);
     } else {
         printf("Test failure (%d passed, %d failed).\n",

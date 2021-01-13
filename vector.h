@@ -29,7 +29,7 @@ void           vector_copy_into(struct vector* reciever, struct vector* v);
 
 
 struct vector* vector_subtract(struct vector* v1, struct vector* v2);
-void           vector_subtract_into(struct vector* reciever, 
+void           vector_subtract_into(struct vector* reciever,
                                     struct vector* v1, struct vector* v2);
 struct vector* vector_add(struct vector* v1, struct vector* v2);
 void           vector_add_into(struct vector* reciever,

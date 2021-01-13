@@ -48,7 +48,7 @@ struct matrix* matrix_random_uniform(int n_row, int n_col, double low, double hi
  *************************/
 
 /* Generate a number distributed as random gaussian noise using the Box-Muller
- * method. 
+ * method.
    The trick of using the static keyword to remember pairs of values is taken
    from wikipedia.
 */

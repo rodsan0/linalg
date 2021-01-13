@@ -55,7 +55,7 @@ void           vector_copy_into(struct vector* reciever, struct vector* v);
 
 
 struct vector* vector_subtract(struct vector* v1, struct vector* v2);
-void           vector_subtract_into(struct vector* reciever, 
+void           vector_subtract_into(struct vector* reciever,
                                     struct vector* v1, struct vector* v2);
 struct vector* vector_add(struct vector* v1, struct vector* v2);
 void           vector_add_into(struct vector* reciever,
@@ -529,7 +529,7 @@ struct matrix* matrix_random_uniform(int n_row, int n_col, double low, double hi
  *************************/
 
 /* Generate a number distributed as random gaussian noise using the Box-Muller
- * method. 
+ * method.
    The trick of using the static keyword to remember pairs of values is taken
    from wikipedia.
 */
@@ -1296,7 +1296,7 @@ void raise_non_zero_reference_free_error() {
    The matrix product transpose(Q)v is easy to compute, so the decomposition
    reduces the problem to solving a linear equation Rx = y for an upper
    triangular matrix R.
-  
+
 */
 struct vector* linsolve_qr(struct matrix* M, struct vector* v) {
     assert(M->n_row == v->length);
@@ -1332,7 +1332,7 @@ struct vector* linsolve_from_qr(struct qr_decomp* qr, struct vector* v) {
    which can be solved by substituting in the value of x_l already found, and
    then solving the resulting equation for x_{l-1}.  Continuing in this way
    solves the entire system.
-*/ 
+*/
 struct vector* linsolve_upper_triangular(struct matrix* R, struct vector* v) {
     assert(R->n_col == v->length);
     assert(R->n_row = R->n_col);
