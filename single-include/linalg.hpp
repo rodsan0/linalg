@@ -805,7 +805,7 @@ struct vector* eigen_backsolve(
 
 struct matrix* matrix_new(int n_row, int n_col) {
     assert(n_row >= 1 && n_col >= 1);
-    struct matrix* new_matrix = static_cast<struct matrix*>(malloc(sizeof(struct linreg)));;
+    struct matrix* new_matrix = static_cast<struct matrix*>(malloc(sizeof(struct matrix)));
     check_memory((void*) new_matrix);
 
     DATA(new_matrix) = static_cast<double*>(malloc((sizeof(double)) * n_row * n_col));
